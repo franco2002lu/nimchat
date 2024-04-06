@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nimchat-deployment
+  labels:
+    app: nimchat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nimchat
+  template:
+    metadata:
+      labels:
+        app: nimchat
+    spec:
+      containers:
+        - name: nimchat
+          image: root/nimchat:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: postgres15-service
+            - name: DB_USER
+              value: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres15-secret
+                  key: franco0808
+            - name: DB_NAME
+              value: postgres15
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nimchat-service
+spec:
+  selector:
+    app: nimchat
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
